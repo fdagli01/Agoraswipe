@@ -1,0 +1,335 @@
+<title>Agoraswipe — Brainscrolling</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  :root{
+    --ink:#0b0e14;          /* derin mürekkep zemini */
+    --ink-2:#11151f;
+    --marble:#ede6d6;       /* sıcak mermer/krem metin */
+    --marble-dim:#b9b2a2;
+    --line:rgba(237,230,214,.14);
+    --acc:#c9a96a;          /* kart bazında override edilir */
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  /* Bu prototip bilinçli olarak tek temadır: gece agorası. */
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--marble)}
+  html{scroll-snap-type:y mandatory;scroll-behavior:smooth}
+  body{font-family:var(--sans);-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
+  *{box-sizing:border-box}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+  button:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:8px}
+
+  /* ---------- üst bar ---------- */
+  .topbar{
+    position:fixed;inset:0 0 auto 0;z-index:40;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:calc(14px + env(safe-area-inset-top)) 20px 14px;
+    background:linear-gradient(to bottom,rgba(11,14,20,.85),rgba(11,14,20,0));
+    pointer-events:none;
+  }
+  .wordmark{display:flex;align-items:baseline;gap:9px;pointer-events:auto}
+  .wordmark .glyph{
+    width:22px;height:22px;border:1.5px solid var(--marble);border-radius:50%;
+    display:inline-grid;place-items:center;align-self:center;
+    font-family:var(--serif);font-size:13px;line-height:1;color:var(--marble);
+  }
+  .wordmark .name{font-family:var(--serif);font-size:20px;letter-spacing:.02em}
+  .wordmark .name i{font-style:italic}
+  .tagline{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--marble-dim)}
+
+  /* ---------- ilerleme rayı ---------- */
+  .rail{
+    position:fixed;right:8px;top:50%;translate:0 -50%;z-index:40;
+    display:flex;flex-direction:column;gap:7px;
+  }
+  .rail span{
+    width:3px;height:16px;border-radius:2px;background:rgba(237,230,214,.18);
+    transition:background .35s,height .35s;
+  }
+  .rail span.on{background:var(--marble);height:26px}
+
+  /* ---------- kartlar ---------- */
+  .card{
+    position:relative;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:0 max(24px,6vw) calc(56px + env(safe-area-inset-bottom));
+    overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 18% 8%, color-mix(in srgb,var(--acc) 16%,transparent), transparent 60%),
+      radial-gradient(110% 80% at 85% 100%, color-mix(in srgb,var(--acc) 9%,transparent), transparent 55%),
+      linear-gradient(var(--ink-2),var(--ink));
+  }
+  .card::after{ /* zar zor görünür doku: agora taşı */
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
+    background-image:radial-gradient(rgba(237,230,214,.9) .6px,transparent .6px);
+    background-size:26px 26px;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+    margin-bottom:auto;margin-top:calc(84px + env(safe-area-inset-top));
+    padding:7px 14px 7px 10px;border-radius:999px;
+    border:1px solid color-mix(in srgb,var(--acc) 55%,transparent);
+    background:color-mix(in srgb,var(--acc) 12%,transparent);
+    font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:color-mix(in srgb,var(--acc) 70%,var(--marble));
+  }
+  .content{max-width:34rem;padding-right:76px;position:relative;z-index:2}
+  .kicker{
+    font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+    color:color-mix(in srgb,var(--acc) 75%,var(--marble));margin:0 0 14px;
+  }
+  .hook{
+    font-family:var(--serif);font-weight:500;text-wrap:balance;
+    font-size:clamp(30px,6.2vw,46px);line-height:1.12;letter-spacing:-.01em;
+    margin:0 0 18px;
+  }
+  .pill-text{font-size:clamp(15.5px,2.2vw,17.5px);line-height:1.65;color:var(--marble);opacity:.92;margin:0 0 20px;max-width:60ch}
+  .source{
+    display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--marble-dim);
+  }
+  .source::before{content:"";width:26px;height:1px;background:var(--acc);flex:none}
+
+  /* kart giriş animasyonu */
+  .content>*{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  .card.live .content>*{opacity:1;transform:none}
+  .card.live .content>*:nth-child(2){transition-delay:.08s}
+  .card.live .content>*:nth-child(3){transition-delay:.16s}
+  .card.live .content>*:nth-child(4){transition-delay:.24s}
+  .card.live .chip{opacity:1;transform:none}
+  .chip{opacity:0;transform:translateY(-14px);transition:opacity .6s,transform .6s}
+
+  /* ---------- aksiyon rayı ---------- */
+  .actions{
+    position:absolute;right:max(14px,3vw);bottom:calc(56px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:22px;z-index:3;
+  }
+  .act{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .act svg{width:30px;height:30px;fill:none;stroke:var(--marble);stroke-width:1.7;transition:transform .15s}
+  .act small{font-size:11px;color:var(--marble-dim);font-variant-numeric:tabular-nums}
+  .act:active svg{transform:scale(.82)}
+  .act.liked svg{fill:#e0655f;stroke:#e0655f;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+  .act.saved svg{fill:var(--acc);stroke:var(--acc);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{0%{transform:scale(.6)}55%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+  /* çift dokunuş kalp patlaması */
+  .burst{
+    position:absolute;z-index:5;pointer-events:none;font-size:74px;translate:-50% -50%;
+    animation:burst .8s ease forwards;
+  }
+  @keyframes burst{
+    0%{opacity:0;transform:scale(.4) rotate(-8deg)}
+    25%{opacity:1;transform:scale(1.15) rotate(3deg)}
+    100%{opacity:0;transform:scale(1.5) translateY(-70px)}
+  }
+
+  /* kaydırma ipucu */
+  .hint{
+    position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));translate:-50% 0;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--marble-dim);
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    animation:bob 2.2s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));translate:-50% 16px;
+    z-index:60;background:var(--marble);color:var(--ink);font-size:13.5px;
+    padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .3s,translate .3s;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;translate:-50% 0}
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .content>*,.chip{opacity:1;transform:none}
+  }
+</style>
+
+<header class="topbar">
+  <div class="wordmark">
+    <span class="glyph">α</span>
+    <span class="name">Agora<i>swipe</i></span>
+  </div>
+  <span class="tagline">Doomscroll'a veda</span>
+</header>
+
+<nav class="rail" id="rail" aria-label="İlerleme"></nav>
+<main id="feed"></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const DATA = [
+  {
+    cat:"Sosyoloji", icon:"🌍", acc:"#4fa8a0",
+    kicker:"Gözetim toplumu",
+    hook:"İzlenmediğin anlarda bile neden izleniyormuş gibi davranıyorsun?",
+    text:"Jeremy Bentham'ın Panoptikon'u, tek bir gardiyanın tüm mahkûmları görebildiği ama mahkûmların ne zaman izlendiklerini asla bilemediği bir hapishane tasarımıydı. Foucault'ya göre bunun dehası şu: izlenip izlenmediğini bilmeyen insan, kendi kendinin gardiyanı olur. Sosyal medyadaki hâlini düşün.",
+    src:"Michel Foucault — Hapishanenin Doğuşu (1975)"
+  },
+  {
+    cat:"Felsefe", icon:"🏛️", acc:"#c9a96a",
+    kicker:"Nietzsche'nin formülü",
+    hook:"Kaderini değiştirmeyi değil, onu sevmeyi dene: Amor Fati.",
+    text:"Nietzsche'ye göre insandaki büyüklüğün formülü, olanın başka türlü olmasını istememektir — ne ileride, ne geride, ne de sonsuza dek. Zorunlu olana katlanmak yetmez; onu gizlemek hiç yetmez. Onu sevmek gerekir. Pişmanlığın panzehiri budur.",
+    src:"Friedrich Nietzsche — Ecce Homo (1888)"
+  },
+  {
+    cat:"Tarih", icon:"📜", acc:"#c2764f",
+    kicker:"Zaman algını kıran gerçek",
+    hook:"Kleopatra, piramitlerin inşasından çok Ay'a inişe yakın yaşadı.",
+    text:"Büyük Giza Piramidi MÖ 2560 civarında tamamlandı. Kleopatra ise MÖ 30'da öldü — yani piramitlere yaklaşık 2500, Apollo 11'e ise sadece 2000 yıl uzaklıkta. Antik Mısır o kadar uzun sürdü ki, Kleopatra piramitlere bizim ona baktığımızdan daha 'antik' bir gözle bakıyordu.",
+    src:"MÖ 2560 → MÖ 30 → MS 1969"
+  },
+  {
+    cat:"Felsefe", icon:"🏛️", acc:"#c9a96a",
+    kicker:"Stoacı sükûnetin sırrı",
+    hook:"Huzursuzluğun tek kaynağı: kontrol edemediğini kontrol etmeye çalışmak.",
+    text:"Epiktetos köle olarak doğdu ve özgürlüğün en net tanımını yaptı: bazı şeyler bize bağlıdır (yargılarımız, seçimlerimiz), bazıları değildir (bedenimiz, ünümüz, başkalarının davranışları). Stoacılığın tamamı bu tek ayrımın üstüne kurulur. Enerjini yanlış kefeye koyduğun her an, kaybettiğin andır.",
+    src:"Epiktetos — Enkheiridion (yak. MS 125)"
+  },
+  {
+    cat:"Din", icon:"🕊️", acc:"#9a86c8",
+    kicker:"Tarihin en tuhaf tesadüfü",
+    hook:"Buda, Konfüçyüs ve Sokrates neredeyse aynı yüzyılda yaşadı.",
+    text:"MÖ 800–200 arasında, birbirinden habersiz coğrafyalarda insanlık aynı anda uyandı: Hindistan'da Buda, Çin'de Konfüçyüs ve Lao Tzu, İran'da Zerdüşt geleneği, İsrail'de peygamberler, Yunanistan'da filozoflar. Karl Jaspers bu döneme 'Eksen Çağı' dedi — bugün hâlâ o çağın sorularıyla yaşıyoruz.",
+    src:"Karl Jaspers — Tarihin Kaynağı ve Hedefi (1949)"
+  },
+  {
+    cat:"Kitap", icon:"📖", acc:"#c07a8a",
+    kicker:"İki distopya, tek kazanan",
+    hook:"Orwell kitapların yasaklanmasından korktu. Huxley, kimsenin okumak istemeyeceğinden.",
+    text:"Neil Postman'ın meşhur karşılaştırması: 1984'te bizi acı yönetir, Cesur Yeni Dünya'da haz. Orwell bilginin bizden gizlenmesinden korkuyordu; Huxley ise bilginin önemsizlik denizinde boğulmasından. Postman'a göre kazanan Huxley oldu. Şu an bu uygulamada olman bile bunun kanıtı sayılır.",
+    src:"Neil Postman — Televizyon: Öldüren Eğlence (1985)"
+  },
+  {
+    cat:"Felsefe", icon:"🏛️", acc:"#c9a96a",
+    kicker:"2400 yıllık bulmaca",
+    hook:"Her parçası değişen gemi hâlâ aynı gemi mi? Peki ya sen?",
+    text:"Atinalılar, Theseus'un gemisini onardıkça eski tahtaların hepsi yenileriyle değişti. Plutarkhos sordu: bu hâlâ aynı gemi mi? Hobbes işi büyüttü: ya biri eski tahtalardan ikinci bir gemi yaparsa? Vücudundaki atomların büyük kısmı yıllar içinde değiştiğine göre, soru aslında seninle ilgili.",
+    src:"Plutarkhos — Paralel Hayatlar, Theseus"
+  },
+  {
+    cat:"Sosyoloji", icon:"🌍", acc:"#4fa8a0",
+    kicker:"Beynindeki misafir listesi",
+    hook:"Beynin en fazla 150 kişilik bir kasabaya göre tasarlandı.",
+    text:"Antropolog Robin Dunbar, primatlarda beyin korteksinin büyüklüğü ile grup boyutu arasında ilişki buldu. İnsan için sınır: anlamlı ilişki sürdürebileceğimiz yaklaşık 150 kişi. Neolitik köyler, Roma birlikleri ve modern şirket ekipleri hep bu sayının etrafında kümelenir. 5000 takipçin olabilir; kabilen hâlâ 150 kişi.",
+    src:"Robin Dunbar — 'Dunbar Sayısı' (1992)"
+  },
+  {
+    cat:"Tarih", icon:"📜", acc:"#c2764f",
+    kicker:"Her şeyi tersine çeviren kazı",
+    hook:"Göbekli Tepe'yi inşa edenler henüz çiftçiliği bile bilmiyordu.",
+    text:"Ders kitapları şöyle diyordu: önce tarım, sonra yerleşim, en son din. Şanlıurfa'daki Göbekli Tepe (MÖ ~9500) bu sırayı bozdu — avcı-toplayıcılar, tarımdan önce dev taş sütunlu tapınaklar dikmişti. Belki de medeniyeti başlatan şey karın tokluğu değil, birlikte inanma ihtiyacıydı.",
+    src:"Klaus Schmidt kazıları, 1995–2014"
+  }
+];
+
+const feed = document.getElementById('feed');
+const rail = document.getElementById('rail');
+const toast = document.getElementById('toast');
+
+const icons = {
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 21c-5.5-4.1-9-7.3-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 3.7-3.5 6.9-9 11z"/></svg>',
+  save:'<svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
+  share:'<svg viewBox="0 0 24 24"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/></svg>'
+};
+
+DATA.forEach((d,i)=>{
+  const s = document.createElement('section');
+  s.className = 'card';
+  s.style.setProperty('--acc', d.acc);
+  s.innerHTML = `
+    <span class="chip"><span aria-hidden="true">${d.icon}</span> ${d.cat}</span>
+    <div class="content">
+      <p class="kicker">${d.kicker}</p>
+      <h2 class="hook">${d.hook}</h2>
+      <p class="pill-text">${d.text}</p>
+      <p class="source">${d.src}</p>
+    </div>
+    <div class="actions">
+      <button class="act like" aria-label="Beğen">${icons.heart}<small>${(Math.random()*4+1.2).toFixed(1)}b</small></button>
+      <button class="act bookmark" aria-label="Kaydet">${icons.save}<small>Kaydet</small></button>
+      <button class="act share" aria-label="Paylaş">${icons.share}<small>Paylaş</small></button>
+    </div>
+    ${i===0?'<div class="hint">Kaydır<span aria-hidden="true">↓</span></div>':''}`;
+  feed.appendChild(s);
+  const dot = document.createElement('span');
+  rail.appendChild(dot);
+});
+
+const cards = [...document.querySelectorAll('.card')];
+const dots = [...rail.children];
+
+/* aktif kart takibi */
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('live');
+      dots.forEach((d,i)=>d.classList.toggle('on', cards[i]===e.target));
+    }
+  });
+},{threshold:.6});
+cards.forEach(c=>io.observe(c));
+
+/* aksiyonlar */
+let toastTimer;
+function say(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 1800);
+}
+function like(card, on=true){
+  const btn = card.querySelector('.like');
+  if(on) btn.classList.add('liked'); else btn.classList.toggle('liked');
+}
+feed.addEventListener('click', e=>{
+  const btn = e.target.closest('.act');
+  if(!btn) return;
+  const card = btn.closest('.card');
+  if(btn.classList.contains('like')) like(card, false);
+  else if(btn.classList.contains('bookmark')){
+    btn.classList.toggle('saved');
+    say(btn.classList.contains('saved') ? 'Kütüphanene kaydedildi' : 'Kayıt kaldırıldı');
+  }
+  else{
+    const d = DATA[cards.indexOf(card)];
+    const payload = `${d.hook} — Agoraswipe`;
+    if(navigator.share){ navigator.share({text:payload}).catch(()=>{}); }
+    else if(navigator.clipboard){ navigator.clipboard.writeText(payload).then(()=>say('Panoya kopyalandı')); }
+    else say('Paylaşım hazır');
+  }
+});
+
+/* çift dokunuş → kalp patlaması */
+let lastTap = 0, lastCard = null;
+feed.addEventListener('pointerup', e=>{
+  if(e.target.closest('.act')) return;
+  const card = e.target.closest('.card');
+  if(!card) return;
+  const now = Date.now();
+  if(now - lastTap < 350 && card === lastCard){
+    like(card, true);
+    const h = document.createElement('span');
+    h.className = 'burst';
+    h.textContent = '🤍';
+    const r = card.getBoundingClientRect();
+    h.style.left = (e.clientX - r.left) + 'px';
+    h.style.top  = (e.clientY - r.top) + 'px';
+    card.appendChild(h);
+    setTimeout(()=>h.remove(), 850);
+  }
+  lastTap = now; lastCard = card;
+});
+
+/* klavye ile gezinme */
+document.addEventListener('keydown', e=>{
+  if(e.key!=='ArrowDown' && e.key!=='ArrowUp') return;
+  e.preventDefault();
+  const idx = dots.findIndex(d=>d.classList.contains('on'));
+  const next = Math.min(Math.max(idx + (e.key==='ArrowDown'?1:-1), 0), cards.length-1);
+  cards[next].scrollIntoView({behavior:'smooth'});
+});
+</script>
