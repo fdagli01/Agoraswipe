@@ -11,63 +11,63 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const DATA = [
   {
-    cat: "Sosyoloji", icon: "🌍", acc: "#4fa8a0",
+    cat: "Sosyoloji", glyph: "Π", icon: "🌍", acc: "#4fa8a0",
     kicker: "Gözetim toplumu",
     hook: "İzlenmediğin anlarda bile neden izleniyormuş gibi davranıyorsun?",
     text: "Jeremy Bentham'ın Panoptikon'u, tek bir gardiyanın tüm mahkûmları görebildiği ama mahkûmların ne zaman izlendiklerini asla bilemediği bir hapishane tasarımıydı. Foucault'ya göre bunun dehası şu: izlenip izlenmediğini bilmeyen insan, kendi kendinin gardiyanı olur. Sosyal medyadaki hâlini düşün.",
     src: "Michel Foucault — Hapishanenin Doğuşu (1975)",
   },
   {
-    cat: "Felsefe", icon: "🏛️", acc: "#c9a96a",
+    cat: "Felsefe", glyph: "Φ", icon: "🏛️", acc: "#c9a96a",
     kicker: "Nietzsche'nin formülü",
     hook: "Kaderini değiştirmeyi değil, onu sevmeyi dene: Amor Fati.",
     text: "Nietzsche'ye göre insandaki büyüklüğün formülü, olanın başka türlü olmasını istememektir — ne ileride, ne geride, ne de sonsuza dek. Zorunlu olana katlanmak yetmez; onu gizlemek hiç yetmez. Onu sevmek gerekir. Pişmanlığın panzehiri budur.",
     src: "Friedrich Nietzsche — Ecce Homo (1888)",
   },
   {
-    cat: "Tarih", icon: "📜", acc: "#c2764f",
+    cat: "Tarih", glyph: "Χ", icon: "📜", acc: "#c2764f",
     kicker: "Zaman algını kıran gerçek",
     hook: "Kleopatra, piramitlerin inşasından çok Ay'a inişe yakın yaşadı.",
     text: "Büyük Giza Piramidi MÖ 2560 civarında tamamlandı. Kleopatra ise MÖ 30'da öldü — yani piramitlere yaklaşık 2500, Apollo 11'e ise sadece 2000 yıl uzaklıkta. Antik Mısır o kadar uzun sürdü ki, Kleopatra piramitlere bizim ona baktığımızdan daha 'antik' bir gözle bakıyordu.",
     src: "MÖ 2560 → MÖ 30 → MS 1969",
   },
   {
-    cat: "Felsefe", icon: "🏛️", acc: "#c9a96a",
+    cat: "Felsefe", glyph: "Φ", icon: "🏛️", acc: "#c9a96a",
     kicker: "Stoacı sükûnetin sırrı",
     hook: "Huzursuzluğun tek kaynağı: kontrol edemediğini kontrol etmeye çalışmak.",
     text: "Epiktetos köle olarak doğdu ve özgürlüğün en net tanımını yaptı: bazı şeyler bize bağlıdır (yargılarımız, seçimlerimiz), bazıları değildir (bedenimiz, ünümüz, başkalarının davranışları). Stoacılığın tamamı bu tek ayrımın üstüne kurulur. Enerjini yanlış kefeye koyduğun her an, kaybettiğin andır.",
     src: "Epiktetos — Enkheiridion (yak. MS 125)",
   },
   {
-    cat: "Din", icon: "🕊️", acc: "#9a86c8",
+    cat: "Din", glyph: "Θ", icon: "🕊️", acc: "#9a86c8",
     kicker: "Tarihin en tuhaf tesadüfü",
     hook: "Buda, Konfüçyüs ve Sokrates neredeyse aynı yüzyılda yaşadı.",
     text: "MÖ 800–200 arasında, birbirinden habersiz coğrafyalarda insanlık aynı anda uyandı: Hindistan'da Buda, Çin'de Konfüçyüs ve Lao Tzu, İran'da Zerdüşt geleneği, İsrail'de peygamberler, Yunanistan'da filozoflar. Karl Jaspers bu döneme 'Eksen Çağı' dedi — bugün hâlâ o çağın sorularıyla yaşıyoruz.",
     src: "Karl Jaspers — Tarihin Kaynağı ve Hedefi (1949)",
   },
   {
-    cat: "Kitap", icon: "📖", acc: "#c07a8a",
+    cat: "Kitap", glyph: "Β", icon: "📖", acc: "#c07a8a",
     kicker: "İki distopya, tek kazanan",
     hook: "Orwell kitapların yasaklanmasından korktu. Huxley, kimsenin okumak istemeyeceğinden.",
     text: "Neil Postman'ın meşhur karşılaştırması: 1984'te bizi acı yönetir, Cesur Yeni Dünya'da haz. Orwell bilginin bizden gizlenmesinden korkuyordu; Huxley ise bilginin önemsizlik denizinde boğulmasından. Postman'a göre kazanan Huxley oldu. Şu an bu uygulamada olman bile bunun kanıtı sayılır.",
     src: "Neil Postman — Televizyon: Öldüren Eğlence (1985)",
   },
   {
-    cat: "Felsefe", icon: "🏛️", acc: "#c9a96a",
+    cat: "Felsefe", glyph: "Φ", icon: "🏛️", acc: "#c9a96a",
     kicker: "2400 yıllık bulmaca",
     hook: "Her parçası değişen gemi hâlâ aynı gemi mi? Peki ya sen?",
     text: "Atinalılar, Theseus'un gemisini onardıkça eski tahtaların hepsi yenileriyle değişti. Plutarkhos sordu: bu hâlâ aynı gemi mi? Hobbes işi büyüttü: ya biri eski tahtalardan ikinci bir gemi yaparsa? Vücudundaki atomların büyük kısmı yıllar içinde değiştiğine göre, soru aslında seninle ilgili.",
     src: "Plutarkhos — Paralel Hayatlar, Theseus",
   },
   {
-    cat: "Sosyoloji", icon: "🌍", acc: "#4fa8a0",
+    cat: "Sosyoloji", glyph: "Π", icon: "🌍", acc: "#4fa8a0",
     kicker: "Beynindeki misafir listesi",
     hook: "Beynin en fazla 150 kişilik bir kasabaya göre tasarlandı.",
     text: "Antropolog Robin Dunbar, primatlarda beyin korteksinin büyüklüğü ile grup boyutu arasında ilişki buldu. İnsan için sınır: anlamlı ilişki sürdürebileceğimiz yaklaşık 150 kişi. Neolitik köyler, Roma birlikleri ve modern şirket ekipleri hep bu sayının etrafında kümelenir. 5000 takipçin olabilir; kabilen hâlâ 150 kişi.",
     src: "Robin Dunbar — 'Dunbar Sayısı' (1992)",
   },
   {
-    cat: "Tarih", icon: "📜", acc: "#c2764f",
+    cat: "Tarih", glyph: "Χ", icon: "📜", acc: "#c2764f",
     kicker: "Her şeyi tersine çeviren kazı",
     hook: "Göbekli Tepe'yi inşa edenler henüz çiftçiliği bile bilmiyordu.",
     text: "Ders kitapları şöyle diyordu: önce tarım, sonra yerleşim, en son din. Şanlıurfa'daki Göbekli Tepe (MÖ ~9500) bu sırayı bozdu — avcı-toplayıcılar, tarımdan önce dev taş sütunlu tapınaklar dikmişti. Belki de medeniyeti başlatan şey karın tokluğu değil, birlikte inanma ihtiyacıydı.",
@@ -147,7 +147,11 @@ export default function Agoraswipe() {
       {/* üst bar */}
       <header className="pointer-events-none fixed inset-x-0 top-0 z-40 flex items-center justify-between px-5 py-4 bg-gradient-to-b from-[#0b0e14]/85 to-transparent">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-[22px] w-[22px] place-items-center rounded-full border-[1.5px] border-[#ede6d6] text-[13px]" style={SERIF}>α</span>
+          <svg viewBox="0 0 64 64" aria-hidden="true" className="h-6 w-6" fill="none" stroke="#ede6d6" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M32 9 L57 29 H7 Z" />
+            <path d="M15 37 V51 M32 37 V51 M49 37 V51" />
+            <path d="M9 57 H55" />
+          </svg>
           <span className="text-xl tracking-wide" style={SERIF}>Agora<i>swipe</i></span>
         </div>
         <span className="text-[10.5px] uppercase tracking-[0.22em] text-[#b9b2a2]">Doomscroll'a veda</span>
@@ -170,6 +174,10 @@ export default function Agoraswipe() {
                          radial-gradient(110% 80% at 85% 100%, ${d.acc}17, transparent 55%),
                          linear-gradient(#11151f,#0b0e14)`,
           }}>
+          {/* kategorinin Yunanca hayalet harfi */}
+          <span aria-hidden="true" className="pointer-events-none absolute -right-[2%] top-[4%] z-[1] select-none leading-none opacity-[0.07]"
+            style={{ ...SERIF, fontSize: "min(46vh,64vw)", color: d.acc }}>{d.glyph}</span>
+
           {/* kategori çipi */}
           <motion.span initial={{ opacity: 0, y: -14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ amount: 0.6 }}
             className="mb-auto mt-24 inline-flex items-center gap-2 self-start rounded-full border px-3.5 py-1.5 text-[11.5px] uppercase tracking-[0.2em]"

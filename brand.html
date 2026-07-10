@@ -1,0 +1,208 @@
+<title>Agoraswipe — Marka Kartelası</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --ink:#0b0e14;--ink-2:#11151f;--marble:#ede6d6;--marble-dim:#b9b2a2;
+    --line:rgba(237,230,214,.13);
+    --gold:#c9a96a;--sienna:#c2764f;--teal:#4fa8a0;--violet:#9a86c8;--rose:#c07a8a;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  /* Marka dünyası bilinçli olarak tek temadır: gece agorası. */
+  html,body{margin:0;background:var(--ink);color:var(--marble)}
+  body{font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  *{box-sizing:border-box}
+  .page{max-width:960px;margin:0 auto;padding:64px 24px 96px}
+
+  header.hero{padding:48px 0 56px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin:0 0 16px}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(34px,6vw,52px);line-height:1.1;margin:0 0 14px;text-wrap:balance}
+  .lede{color:var(--marble-dim);max-width:56ch;margin:0}
+
+  section{padding:52px 0;border-bottom:1px solid var(--line)}
+  h2{font-family:var(--serif);font-weight:500;font-size:26px;margin:0 0 6px}
+  .sub{color:var(--marble-dim);font-size:14.5px;margin:0 0 30px;max-width:64ch}
+
+  .grid{display:grid;gap:18px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .tile{
+    border:1px solid var(--line);border-radius:14px;background:var(--ink-2);
+    padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+    min-height:200px;
+  }
+  .tile figcaption{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--marble-dim)}
+  figure{margin:0;display:contents}
+  .tile.light{background:#f2ede1;border-color:transparent}
+  .tile.light figcaption{color:#8a8474}
+
+  .mark{fill:none;stroke:var(--marble);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round}
+  .mark.gold{stroke:var(--gold)}
+  .mark.dark{stroke:#0b0e14}
+
+  .lockup{display:flex;align-items:center;gap:12px}
+  .lockup .name{font-family:var(--serif);font-size:28px}
+  .lockup .name i{font-style:italic}
+  .lockup.stacked{flex-direction:column;gap:14px}
+  .tile.light .name{color:#0b0e14}
+
+  /* uygulama ikonu */
+  .appicon{
+    display:grid;place-items:center;background:
+      radial-gradient(120% 100% at 25% 12%, rgba(201,169,106,.22), transparent 60%),
+      linear-gradient(#151a26,#0b0e14);
+    border:1px solid rgba(237,230,214,.1);
+  }
+  .icon-row{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;justify-content:center}
+  .icon-row figure{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .icon-row figcaption{font-size:11px;color:var(--marble-dim);letter-spacing:.12em}
+
+  /* palet */
+  .swatch{border-radius:14px;padding:18px;min-height:130px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid var(--line)}
+  .swatch b{font-size:14px;font-weight:600}
+  .swatch code{font-size:12px;opacity:.75;font-family:ui-monospace,Menlo,monospace}
+  .on-dark{color:var(--marble)}
+  .on-ink{color:#0b0e14}
+
+  /* tipografi */
+  .spec{display:flex;flex-direction:column;gap:22px}
+  .spec .row{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:baseline}
+  .spec .label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--marble-dim)}
+  .spec .hookx{font-family:var(--serif);font-size:34px;line-height:1.15;text-wrap:balance}
+  .spec .bodyx{font-size:16.5px;line-height:1.65;max-width:58ch}
+  .spec .labelx{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+  @media (max-width:620px){.spec .row{grid-template-columns:1fr;gap:6px}}
+
+  /* kategori sistemi */
+  .cats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .cat{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--ink-2);position:relative;overflow:hidden;min-height:120px}
+  .cat .greek{position:absolute;right:-6px;bottom:-24px;font-family:var(--serif);font-size:96px;line-height:1;opacity:.14}
+  .cat .chip{display:inline-flex;gap:7px;align-items:center;padding:6px 12px;border-radius:999px;border:1px solid;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .cat p{font-size:12.5px;color:var(--marble-dim);margin:12px 0 0}
+
+  ul.rules{margin:0;padding-left:20px;color:var(--marble-dim);font-size:14.5px;max-width:64ch}
+  ul.rules li{margin-bottom:8px}
+  ul.rules b{color:var(--marble);font-weight:600}
+</style>
+
+<div class="page">
+  <header class="hero">
+    <p class="eyebrow">Marka Kartelası · v1</p>
+    <h1>Agora<i style="font-style:italic">swipe</i></h1>
+    <p class="lede">Doomscrolling'in panzehiri. Gece Agorası tasarım dili: derin mürekkep zemini üstünde sıcak mermer tipografi ve bilgiye açılan bir tapınak işareti.</p>
+  </header>
+
+  <section>
+    <h2>Logo işareti: Tapınak</h2>
+    <p class="sub">Alınlık üçgeni + üç sütun + basamak. Agora'nın mimari özü, tek çizgi kalınlığında. Üç sütun üç bilgi sütununu temsil eder: sormak, hatırlamak, anlamak. 16px'e kadar okunur kalır.</p>
+    <div class="grid g3">
+      <figure><div class="tile">
+        <svg class="mark" width="96" height="96" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        <figcaption>Birincil · mermer</figcaption>
+      </div></figure>
+      <figure><div class="tile">
+        <svg class="mark gold" width="96" height="96" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        <figcaption>Vurgu · altın</figcaption>
+      </div></figure>
+      <figure><div class="tile light">
+        <svg class="mark dark" width="96" height="96" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        <figcaption>Açık zemin varyantı</figcaption>
+      </div></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kilitli düzenler</h2>
+    <p class="sub">Yatay düzen üst barlar ve başlıklar için; dikey düzen açılış ekranı ve paylaşım kartları için. "swipe" her zaman italik — hareketi kelimenin içine gömer.</p>
+    <div class="grid g2">
+      <figure><div class="tile">
+        <div class="lockup">
+          <svg class="mark" width="34" height="34" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+          <span class="name">Agora<i>swipe</i></span>
+        </div>
+        <figcaption>Yatay kilit</figcaption>
+      </div></figure>
+      <figure><div class="tile">
+        <div class="lockup stacked">
+          <svg class="mark gold" width="52" height="52" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+          <span class="name">Agora<i>swipe</i></span>
+        </div>
+        <figcaption>Dikey kilit · açılış</figcaption>
+      </div></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Uygulama ikonu</h2>
+    <p class="sub">Ana ekranda günlük ritüelin kapısı: mürekkep zemin, sol üstten altın ışık, mermer tapınak. Metin yok — işaret tek başına taşır.</p>
+    <div class="icon-row">
+      <figure>
+        <div class="appicon" style="width:120px;height:120px;border-radius:27px">
+          <svg class="mark" width="66" height="66" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        </div><figcaption>120px</figcaption>
+      </figure>
+      <figure>
+        <div class="appicon" style="width:72px;height:72px;border-radius:17px">
+          <svg class="mark" width="40" height="40" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        </div><figcaption>72px</figcaption>
+      </figure>
+      <figure>
+        <div class="appicon" style="width:44px;height:44px;border-radius:11px">
+          <svg class="mark" width="26" height="26" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        </div><figcaption>44px</figcaption>
+      </figure>
+      <figure>
+        <div class="appicon" style="width:28px;height:28px;border-radius:7px">
+          <svg class="mark" width="17" height="17" viewBox="0 0 64 64"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+        </div><figcaption>28px</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Renk</h2>
+    <p class="sub">İki nötr taşıyıcı, beş kategori vurgusu. Vurgular hiçbir zaman geniş yüzey boyamaz; degrade tonu, çip ve hayalet harf olarak yaşar.</p>
+    <div class="grid g3">
+      <div class="swatch on-dark" style="background:#0b0e14"><b>Mürekkep</b><code>#0B0E14 · zemin</code></div>
+      <div class="swatch on-ink" style="background:#ede6d6"><b>Mermer</b><code>#EDE6D6 · tipografi</code></div>
+      <div class="swatch on-ink" style="background:#c9a96a"><b>Altın · Felsefe</b><code>#C9A96A</code></div>
+      <div class="swatch on-ink" style="background:#c2764f"><b>Sienna · Tarih</b><code>#C2764F</code></div>
+      <div class="swatch on-ink" style="background:#4fa8a0"><b>Turkuaz · Sosyoloji</b><code>#4FA8A0</code></div>
+      <div class="swatch on-ink" style="background:#9a86c8"><b>Menekşe · Din</b><code>#9A86C8</code></div>
+      <div class="swatch on-ink" style="background:#c07a8a"><b>Gül · Kitap</b><code>#C07A8A</code></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tipografi</h2>
+    <p class="sub">Kanca konuşur, arayüz fısıldar. Başlıklar klasik serif (Iowan Old Style / Palatino soyu), gövde ve etiketler sistem sans.</p>
+    <div class="spec">
+      <div class="row"><span class="label">Kanca · Serif 500</span><span class="hookx">Kaderini değiştirmeyi değil, onu sevmeyi dene.</span></div>
+      <div class="row"><span class="label">Gövde · Sans 400</span><span class="bodyx">Nietzsche'ye göre insandaki büyüklüğün formülü, olanın başka türlü olmasını istememektir. Zorunlu olana katlanmak yetmez; onu sevmek gerekir.</span></div>
+      <div class="row"><span class="label">Etiket · Sans caps</span><span class="labelx">Nietzsche'nin Formülü</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kategori sistemi</h2>
+    <p class="sub">Her kategorinin bir vurgu rengi ve Yunanca bir hayalet harfi var — harfler süs değil, kavramın kökü.</p>
+    <div class="cats">
+      <div class="cat"><span class="chip" style="border-color:#c9a96a8c;background:#c9a96a1f;color:#c9a96a">🏛️ Felsefe</span><span class="greek" style="color:#c9a96a">Φ</span><p>Φ — philosophia</p></div>
+      <div class="cat"><span class="chip" style="border-color:#c2764f8c;background:#c2764f1f;color:#c2764f">📜 Tarih</span><span class="greek" style="color:#c2764f">Χ</span><p>Χ — khronos, zaman</p></div>
+      <div class="cat"><span class="chip" style="border-color:#4fa8a08c;background:#4fa8a01f;color:#4fa8a0">🌍 Sosyoloji</span><span class="greek" style="color:#4fa8a0">Π</span><p>Π — polis, toplum</p></div>
+      <div class="cat"><span class="chip" style="border-color:#9a86c88c;background:#9a86c81f;color:#9a86c8">🕊️ Din</span><span class="greek" style="color:#9a86c8">Θ</span><p>Θ — theos, kutsal</p></div>
+      <div class="cat"><span class="chip" style="border-color:#c07a8a8c;background:#c07a8a1f;color:#c07a8a">📖 Kitap</span><span class="greek" style="color:#c07a8a">Β</span><p>Β — biblos, kitap</p></div>
+    </div>
+  </section>
+
+  <section style="border-bottom:0">
+    <h2>Kullanım ilkeleri</h2>
+    <ul class="rules">
+      <li><b>İşaret nefes alır:</b> etrafında en az kendi yüksekliğinin yarısı kadar boşluk bırak.</li>
+      <li><b>Tek vurgu kuralı:</b> bir ekranda tek kategori rengi yaşar; renkler yan yana yarışmaz.</li>
+      <li><b>Serif yalnızca kancada:</b> gövde metni ve butonlar asla serif olmaz.</li>
+      <li><b>İşareti doldurma:</b> tapınak her zaman kontur kalır; dolgulu versiyon yok.</li>
+      <li><b>Slogan:</b> "Doomscroll'a veda" — her zaman harf aralıklı küçük caps, mermer-soluk tonda.</li>
+    </ul>
+  </section>
+</div>
