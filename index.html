@@ -1,5 +1,13 @@
 <title>Agoraswipe — Brainscrolling</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0e14">
+<meta name="description" content="Doomscrolling yerine felsefe, tarih, sosyoloji, din ve kitaplardan hap bilgiler.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Agoraswipe">
 <style>
   :root{
     --ink:#0b0e14;          /* derin mürekkep zemini */
@@ -35,6 +43,60 @@
   .wordmark .name{font-family:var(--serif);font-size:20px;letter-spacing:.02em}
   .wordmark .name i{font-style:italic}
   .tagline{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--marble-dim)}
+
+  .topbar-right{display:flex;align-items:center;gap:14px;pointer-events:auto}
+  .streak{
+    display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--marble-dim);
+    font-variant-numeric:tabular-nums;
+  }
+  .streak b{color:var(--marble);font-weight:600}
+  .libbtn{display:flex;padding:6px;margin:-6px;border-radius:8px}
+  .libbtn svg{width:21px;height:21px;fill:none;stroke:var(--marble);stroke-width:1.7}
+  .libbtn.has-saved svg{fill:var(--acc);stroke:var(--acc)}
+
+  /* ---------- kütüphane paneli ---------- */
+  .library{
+    position:fixed;inset:0;z-index:80;background:rgba(11,14,20,.72);backdrop-filter:blur(6px);
+    display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .28s ease;
+  }
+  .library.open{opacity:1;pointer-events:auto}
+  .library-sheet{
+    width:100%;max-height:82dvh;margin-top:auto;background:var(--ink-2);
+    border-radius:22px 22px 0 0;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;translate:0 16px;transition:translate .28s cubic-bezier(.2,.8,.2,1);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .library.open .library-sheet{translate:0 0}
+  .library-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 22px 14px;border-bottom:1px solid var(--line);
+  }
+  .library-head h2{font-family:var(--serif);font-weight:500;font-size:21px;margin:0}
+  .library-close{padding:8px;margin:-8px;border-radius:8px;color:var(--marble-dim);font-size:20px;line-height:1}
+  .library-list{overflow-y:auto;padding:6px 12px 22px}
+  .lib-item{
+    width:100%;display:flex;align-items:flex-start;gap:12px;text-align:left;
+    padding:13px 10px;border-radius:12px;border-bottom:1px solid var(--line);
+  }
+  .lib-item:last-child{border-bottom:0}
+  .lib-item .lib-icon{font-size:18px;line-height:1;margin-top:2px}
+  .lib-item .lib-body p{margin:0}
+  .lib-item .lib-cat{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc-l,var(--marble-dim));margin-bottom:4px}
+  .lib-item .lib-hook{font-family:var(--serif);font-size:15.5px;line-height:1.3}
+  .library-empty{padding:48px 24px 12px;text-align:center;color:var(--marble-dim);font-size:14px;line-height:1.6}
+
+  /* ---------- gün kapanışı kartı ---------- */
+  .closing{
+    align-items:center;text-align:center;justify-content:center;
+    background:linear-gradient(var(--ink-2),var(--ink))!important;
+  }
+  .closing .mark{width:40px;height:40px;stroke:var(--acc);opacity:.85;margin-bottom:22px}
+  .closing h2{font-family:var(--serif);font-weight:500;font-size:clamp(24px,5vw,32px);line-height:1.25;max-width:22ch;margin:0 0 12px;text-wrap:balance}
+  .closing p{color:var(--marble-dim);font-size:14.5px;max-width:34ch;margin:0 0 30px;line-height:1.6}
+  .closing button{
+    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--marble-dim);
+    border-bottom:1px solid var(--line);padding-bottom:3px;
+  }
 
   /* ---------- ilerleme rayı ---------- */
   .rail{
@@ -161,73 +223,88 @@
     </svg>
     <span class="name">Agora<i>swipe</i></span>
   </div>
-  <span class="tagline">Doomscroll'a veda</span>
+  <div class="topbar-right">
+    <span class="streak" id="streak" title="Günlük seri" hidden></span>
+    <button class="libbtn" id="libOpen" aria-label="Kütüphanem">
+      <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
+    </button>
+  </div>
 </header>
 
 <nav class="rail" id="rail" aria-label="İlerleme"></nav>
 <main id="feed"></main>
 <div class="toast" id="toast" role="status"></div>
 
+<div class="library" id="library" aria-hidden="true">
+  <div class="library-sheet" role="dialog" aria-label="Kütüphanem">
+    <div class="library-head">
+      <h2>Kütüphanem</h2>
+      <button class="library-close" id="libClose" aria-label="Kapat">✕</button>
+    </div>
+    <div class="library-list" id="libList"></div>
+  </div>
+</div>
+
 <script>
 const DATA = [
   {
-    cat:"Sosyoloji", glyph:"Π", icon:"🌍", acc:"#4fa8a0",
+    cat:"Sosyoloji", glyph:"Π", icon:"🌍", acc:"#4fa8a0", id:"panoptikon",
     kicker:"Gözetim toplumu",
     hook:"İzlenmediğin anlarda bile neden izleniyormuş gibi davranıyorsun?",
     text:"Jeremy Bentham'ın Panoptikon'u, tek bir gardiyanın tüm mahkûmları görebildiği ama mahkûmların ne zaman izlendiklerini asla bilemediği bir hapishane tasarımıydı. Foucault'ya göre bunun dehası şu: izlenip izlenmediğini bilmeyen insan, kendi kendinin gardiyanı olur. Sosyal medyadaki hâlini düşün.",
     src:"Michel Foucault — Hapishanenin Doğuşu (1975)"
   },
   {
-    cat:"Felsefe", glyph:"Φ", icon:"🏛️", acc:"#c9a96a",
+    cat:"Felsefe", glyph:"Φ", icon:"🏛️", acc:"#c9a96a", id:"amor-fati",
     kicker:"Nietzsche'nin formülü",
     hook:"Kaderini değiştirmeyi değil, onu sevmeyi dene: Amor Fati.",
     text:"Nietzsche'ye göre insandaki büyüklüğün formülü, olanın başka türlü olmasını istememektir — ne ileride, ne geride, ne de sonsuza dek. Zorunlu olana katlanmak yetmez; onu gizlemek hiç yetmez. Onu sevmek gerekir. Pişmanlığın panzehiri budur.",
     src:"Friedrich Nietzsche — Ecce Homo (1888)"
   },
   {
-    cat:"Tarih", glyph:"Χ", icon:"📜", acc:"#c2764f",
+    cat:"Tarih", glyph:"Χ", icon:"📜", acc:"#c2764f", id:"kleopatra-zaman",
     kicker:"Zaman algını kıran gerçek",
     hook:"Kleopatra, piramitlerin inşasından çok Ay'a inişe yakın yaşadı.",
     text:"Büyük Giza Piramidi MÖ 2560 civarında tamamlandı. Kleopatra ise MÖ 30'da öldü — yani piramitlere yaklaşık 2500, Apollo 11'e ise sadece 2000 yıl uzaklıkta. Antik Mısır o kadar uzun sürdü ki, Kleopatra piramitlere bizim ona baktığımızdan daha 'antik' bir gözle bakıyordu.",
     src:"MÖ 2560 → MÖ 30 → MS 1969"
   },
   {
-    cat:"Felsefe", glyph:"Φ", icon:"🏛️", acc:"#c9a96a",
+    cat:"Felsefe", glyph:"Φ", icon:"🏛️", acc:"#c9a96a", id:"stoacilik",
     kicker:"Stoacı sükûnetin sırrı",
     hook:"Huzursuzluğun tek kaynağı: kontrol edemediğini kontrol etmeye çalışmak.",
     text:"Epiktetos köle olarak doğdu ve özgürlüğün en net tanımını yaptı: bazı şeyler bize bağlıdır (yargılarımız, seçimlerimiz), bazıları değildir (bedenimiz, ünümüz, başkalarının davranışları). Stoacılığın tamamı bu tek ayrımın üstüne kurulur. Enerjini yanlış kefeye koyduğun her an, kaybettiğin andır.",
     src:"Epiktetos — Enkheiridion (yak. MS 125)"
   },
   {
-    cat:"Din", glyph:"Θ", icon:"🕊️", acc:"#9a86c8",
+    cat:"Din", glyph:"Θ", icon:"🕊️", acc:"#9a86c8", id:"eksen-cagi",
     kicker:"Tarihin en tuhaf tesadüfü",
     hook:"Buda, Konfüçyüs ve Sokrates neredeyse aynı yüzyılda yaşadı.",
     text:"MÖ 800–200 arasında, birbirinden habersiz coğrafyalarda insanlık aynı anda uyandı: Hindistan'da Buda, Çin'de Konfüçyüs ve Lao Tzu, İran'da Zerdüşt geleneği, İsrail'de peygamberler, Yunanistan'da filozoflar. Karl Jaspers bu döneme 'Eksen Çağı' dedi — bugün hâlâ o çağın sorularıyla yaşıyoruz.",
     src:"Karl Jaspers — Tarihin Kaynağı ve Hedefi (1949)"
   },
   {
-    cat:"Kitap", glyph:"Β", icon:"📖", acc:"#c07a8a",
+    cat:"Kitap", glyph:"Β", icon:"📖", acc:"#c07a8a", id:"orwell-huxley",
     kicker:"İki distopya, tek kazanan",
     hook:"Orwell kitapların yasaklanmasından korktu. Huxley, kimsenin okumak istemeyeceğinden.",
     text:"Neil Postman'ın meşhur karşılaştırması: 1984'te bizi acı yönetir, Cesur Yeni Dünya'da haz. Orwell bilginin bizden gizlenmesinden korkuyordu; Huxley ise bilginin önemsizlik denizinde boğulmasından. Postman'a göre kazanan Huxley oldu. Şu an bu uygulamada olman bile bunun kanıtı sayılır.",
     src:"Neil Postman — Televizyon: Öldüren Eğlence (1985)"
   },
   {
-    cat:"Felsefe", glyph:"Φ", icon:"🏛️", acc:"#c9a96a",
+    cat:"Felsefe", glyph:"Φ", icon:"🏛️", acc:"#c9a96a", id:"theseus-gemisi",
     kicker:"2400 yıllık bulmaca",
     hook:"Her parçası değişen gemi hâlâ aynı gemi mi? Peki ya sen?",
     text:"Atinalılar, Theseus'un gemisini onardıkça eski tahtaların hepsi yenileriyle değişti. Plutarkhos sordu: bu hâlâ aynı gemi mi? Hobbes işi büyüttü: ya biri eski tahtalardan ikinci bir gemi yaparsa? Vücudundaki atomların büyük kısmı yıllar içinde değiştiğine göre, soru aslında seninle ilgili.",
     src:"Plutarkhos — Paralel Hayatlar, Theseus"
   },
   {
-    cat:"Sosyoloji", glyph:"Π", icon:"🌍", acc:"#4fa8a0",
+    cat:"Sosyoloji", glyph:"Π", icon:"🌍", acc:"#4fa8a0", id:"dunbar-sayisi",
     kicker:"Beynindeki misafir listesi",
     hook:"Beynin en fazla 150 kişilik bir kasabaya göre tasarlandı.",
     text:"Antropolog Robin Dunbar, primatlarda beyin korteksinin büyüklüğü ile grup boyutu arasında ilişki buldu. İnsan için sınır: anlamlı ilişki sürdürebileceğimiz yaklaşık 150 kişi. Neolitik köyler, Roma birlikleri ve modern şirket ekipleri hep bu sayının etrafında kümelenir. 5000 takipçin olabilir; kabilen hâlâ 150 kişi.",
     src:"Robin Dunbar — 'Dunbar Sayısı' (1992)"
   },
   {
-    cat:"Tarih", glyph:"Χ", icon:"📜", acc:"#c2764f",
+    cat:"Tarih", glyph:"Χ", icon:"📜", acc:"#c2764f", id:"gobekli-tepe",
     kicker:"Her şeyi tersine çeviren kazı",
     hook:"Göbekli Tepe'yi inşa edenler henüz çiftçiliği bile bilmiyordu.",
     text:"Ders kitapları şöyle diyordu: önce tarım, sonra yerleşim, en son din. Şanlıurfa'daki Göbekli Tepe (MÖ ~9500) bu sırayı bozdu — avcı-toplayıcılar, tarımdan önce dev taş sütunlu tapınaklar dikmişti. Belki de medeniyeti başlatan şey karın tokluğu değil, birlikte inanma ihtiyacıydı.",
@@ -238,6 +315,10 @@ const DATA = [
 const feed = document.getElementById('feed');
 const rail = document.getElementById('rail');
 const toast = document.getElementById('toast');
+const streakEl = document.getElementById('streak');
+const libBtn = document.getElementById('libOpen');
+const library = document.getElementById('library');
+const libList = document.getElementById('libList');
 
 const icons = {
   heart:'<svg viewBox="0 0 24 24"><path d="M12 21c-5.5-4.1-9-7.3-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 3.7-3.5 6.9-9 11z"/></svg>',
@@ -245,10 +326,46 @@ const icons = {
   share:'<svg viewBox="0 0 24 24"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/></svg>'
 };
 
-DATA.forEach((d,i)=>{
+/* ---------- kalıcı durum (localStorage) ---------- */
+function lsArr(key){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch{ return []; } }
+function lsSet(key, arr){ try{ localStorage.setItem(key, JSON.stringify(arr)); }catch{} }
+
+let savedIds = lsArr('agoraswipe:saved');
+let likedIds = lsArr('agoraswipe:liked');
+
+/* ---------- günlük seri ---------- */
+(function trackStreak(){
+  const todayStr = new Date().toISOString().slice(0,10);
+  const last = localStorage.getItem('agoraswipe:lastVisit');
+  let streak = parseInt(localStorage.getItem('agoraswipe:streak') || '0', 10);
+  if(last !== todayStr){
+    const y = new Date(); y.setDate(y.getDate()-1);
+    streak = (last === y.toISOString().slice(0,10)) ? streak+1 : 1;
+    localStorage.setItem('agoraswipe:lastVisit', todayStr);
+    localStorage.setItem('agoraswipe:streak', String(streak));
+  } else if(streak === 0){
+    streak = 1;
+    localStorage.setItem('agoraswipe:streak', '1');
+  }
+  if(streak >= 1){
+    streakEl.innerHTML = `🔥 <b>${streak}</b> gün`;
+    streakEl.hidden = false;
+  }
+})();
+
+/* ---------- bugünün agorası: her gün farklı 5 kart ---------- */
+const dayIndex = Math.floor(Date.now() / 86400000) % DATA.length;
+const rotated = DATA.slice(dayIndex).concat(DATA.slice(0, dayIndex));
+const today5 = rotated.slice(0, Math.min(5, DATA.length));
+const rest = rotated.slice(today5.length);
+
+function cardSection(d, isFirst){
   const s = document.createElement('section');
   s.className = 'card';
+  s.dataset.id = d.id;
   s.style.setProperty('--acc', d.acc);
+  const isLiked = likedIds.includes(d.id);
+  const isSaved = savedIds.includes(d.id);
   s.innerHTML = `
     <span class="ghost" aria-hidden="true">${d.glyph}</span>
     <span class="chip"><span aria-hidden="true">${d.icon}</span> ${d.cat}</span>
@@ -259,15 +376,36 @@ DATA.forEach((d,i)=>{
       <p class="source">${d.src}</p>
     </div>
     <div class="actions">
-      <button class="act like" aria-label="Beğen">${icons.heart}<small>${(Math.random()*4+1.2).toFixed(1)}b</small></button>
-      <button class="act bookmark" aria-label="Kaydet">${icons.save}<small>Kaydet</small></button>
+      <button class="act like${isLiked?' liked':''}" aria-label="Beğen">${icons.heart}<small>${(Math.random()*4+1.2).toFixed(1)}b</small></button>
+      <button class="act bookmark${isSaved?' saved':''}" aria-label="Kaydet">${icons.save}<small>Kaydet</small></button>
       <button class="act share" aria-label="Paylaş">${icons.share}<small>Paylaş</small></button>
     </div>
-    ${i===0?'<div class="hint">Kaydır<span aria-hidden="true">↓</span></div>':''}`;
-  feed.appendChild(s);
-  const dot = document.createElement('span');
-  rail.appendChild(dot);
+    ${isFirst?'<div class="hint">Kaydır<span aria-hidden="true">↓</span></div>':''}`;
+  return s;
+}
+
+function closingSection(){
+  const s = document.createElement('section');
+  s.className = 'card closing';
+  s.innerHTML = `
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 9 L57 29 H7 Z"/><path d="M15 37 V51 M32 37 V51 M49 37 V51"/><path d="M9 57 H55"/></svg>
+    <h2>Bugünlük Agora'yı tamamladın.</h2>
+    <p>Beş hap bilgi, düşünmeye yeter. Yarın yeni bir seçki seni bekliyor — seri devam ediyor.</p>
+    <button id="keepGoing">Yine de devam et</button>`;
+  return s;
+}
+
+today5.forEach((d,i)=> feed.appendChild(cardSection(d, i===0)));
+feed.appendChild(closingSection());
+rest.forEach(d=> feed.appendChild(cardSection(d, false)));
+
+document.getElementById('keepGoing').addEventListener('click', ()=>{
+  const closing = document.querySelector('.closing');
+  const next = closing.nextElementSibling;
+  if(next) next.scrollIntoView({behavior:'smooth'});
 });
+
+for(const _ of document.querySelectorAll('.card')) rail.appendChild(document.createElement('span'));
 
 const cards = [...document.querySelectorAll('.card')];
 const dots = [...rail.children];
@@ -294,18 +432,61 @@ function say(msg){
 function like(card, on=true){
   const btn = card.querySelector('.like');
   if(on) btn.classList.add('liked'); else btn.classList.toggle('liked');
+  const id = card.dataset.id;
+  const isOn = btn.classList.contains('liked');
+  likedIds = isOn ? [...new Set([...likedIds, id])] : likedIds.filter(x=>x!==id);
+  lsSet('agoraswipe:liked', likedIds);
 }
+
+function renderLibrary(){
+  libBtn.classList.toggle('has-saved', savedIds.length > 0);
+  if(!savedIds.length){
+    libList.innerHTML = `<p class="library-empty">Henüz bir şey kaydetmedin.<br>Bir kartı beğenip bookmark'a dokun, burada seni beklesin.</p>`;
+    return;
+  }
+  libList.innerHTML = savedIds.map(id=>{
+    const d = DATA.find(x=>x.id===id);
+    if(!d) return '';
+    return `<button class="lib-item" data-id="${id}">
+      <span class="lib-icon" aria-hidden="true">${d.icon}</span>
+      <span class="lib-body">
+        <p class="lib-cat" style="color:${d.acc}">${d.cat}</p>
+        <p class="lib-hook">${d.hook}</p>
+      </span>
+    </button>`;
+  }).join('');
+}
+renderLibrary();
+
+libBtn.addEventListener('click', ()=>{ library.classList.add('open'); library.setAttribute('aria-hidden','false'); });
+document.getElementById('libClose').addEventListener('click', closeLibrary);
+library.addEventListener('click', e=>{ if(e.target===library) closeLibrary(); });
+function closeLibrary(){ library.classList.remove('open'); library.setAttribute('aria-hidden','true'); }
+
+libList.addEventListener('click', e=>{
+  const item = e.target.closest('.lib-item');
+  if(!item) return;
+  closeLibrary();
+  const target = feed.querySelector(`.card[data-id="${item.dataset.id}"]`);
+  setTimeout(()=> target?.scrollIntoView({behavior:'smooth'}), 200);
+});
+
 feed.addEventListener('click', e=>{
   const btn = e.target.closest('.act');
   if(!btn) return;
   const card = btn.closest('.card');
+  const id = card.dataset.id;
   if(btn.classList.contains('like')) like(card, false);
   else if(btn.classList.contains('bookmark')){
     btn.classList.toggle('saved');
-    say(btn.classList.contains('saved') ? 'Kütüphanene kaydedildi' : 'Kayıt kaldırıldı');
+    const isOn = btn.classList.contains('saved');
+    savedIds = isOn ? [id, ...savedIds.filter(x=>x!==id)] : savedIds.filter(x=>x!==id);
+    lsSet('agoraswipe:saved', savedIds);
+    renderLibrary();
+    say(isOn ? 'Kütüphanene kaydedildi' : 'Kayıt kaldırıldı');
   }
   else{
-    const d = DATA[cards.indexOf(card)];
+    const d = DATA.find(x=>x.id===id);
     const payload = `${d.hook} — Agoraswipe`;
     if(navigator.share){ navigator.share({text:payload}).catch(()=>{}); }
     else if(navigator.clipboard){ navigator.clipboard.writeText(payload).then(()=>say('Panoya kopyalandı')); }
@@ -316,9 +497,9 @@ feed.addEventListener('click', e=>{
 /* çift dokunuş → kalp patlaması */
 let lastTap = 0, lastCard = null;
 feed.addEventListener('pointerup', e=>{
-  if(e.target.closest('.act')) return;
+  if(e.target.closest('.act') || e.target.closest('#keepGoing')) return;
   const card = e.target.closest('.card');
-  if(!card) return;
+  if(!card || card.classList.contains('closing')) return;
   const now = Date.now();
   if(now - lastTap < 350 && card === lastCard){
     like(card, true);
@@ -342,4 +523,12 @@ document.addEventListener('keydown', e=>{
   const next = Math.min(Math.max(idx + (e.key==='ArrowDown'?1:-1), 0), cards.length-1);
   cards[next].scrollIntoView({behavior:'smooth'});
 });
+
+/* PWA: çevrimdışı önbellek. Kendi sunduğun bir originde çalışır; */
+/* artifact önizlemesinde sessizce devre dışı kalır. */
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
